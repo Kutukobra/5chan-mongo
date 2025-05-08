@@ -22,5 +22,14 @@ const postSchema = new mongoose.Schema (
     }, { timestamps: true }
 )
 
+const autoPopulateReplies = (next) => {
+    this.populate('replies');
+    next();
+}
+
+postSchema
+    .pre('findOne', autoPopulateReplies)
+    .pre('find', autoPopulateReplies);
+
 const Post = mongoose.model("Post", postSchema);
 module.exports = Post;
