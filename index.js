@@ -23,7 +23,7 @@ app.get('/', (req, res) => {
     res.sendStatus(200);
 });
 
-app.use('/creator', require('./src/routes/creator.route'));
+app.use('/user', require('./src/routes/user.route'));
 app.use('/post', require('./src/routes/post.route'));
 
 app.listen(
