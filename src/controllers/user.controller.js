@@ -1,6 +1,30 @@
 const baseResponse = require('../utils/baseResponse.util');
 const User = require('../models/user.model');
 
+exports.register = async (req, res) => {
+    try {
+        const { username, password } = req.body;
+
+        const user = new User({ username: username, password: password });
+        await user.save();
+
+        baseResponse(
+            res,
+            true,
+            200,
+            "Register success.",
+            user
+        )            
+    } catch (err) {
+        baseResponse(
+            res,
+            false,
+            "Register failed: " + err.message
+        );
+        console.log(`Error Message: ${err.message}`);
+    }
+}
+
 exports.login = async (req, res) => {
     try {
         const { username, password } = req.body;
@@ -24,30 +48,6 @@ exports.login = async (req, res) => {
             false,
             400,
             "Login failed: " + err.message
-        );
-        console.log(`Error Message: ${err.message}`);
-    }
-}
-
-exports.register = async (req, res) => {
-    try {
-        const { username, password } = req.body;
-
-        const user = new User({ username: username, password: password });
-        await user.save();
-
-        baseResponse(
-            res,
-            true,
-            200,
-            "Register success.",
-            user
-        )            
-    } catch (err) {
-        baseResponse(
-            res,
-            false,
-            "Register failed: " + err.message
         );
         console.log(`Error Message: ${err.message}`);
     }
