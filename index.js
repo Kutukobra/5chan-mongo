@@ -8,10 +8,6 @@ const PORT = process.env.PORT || 3000;
 
 const app = express();
 
-const db = require('./src/database/mdb.js');
-
-// connect to database
-db.connectDB();
 
 app.use(express.json());
 
@@ -28,7 +24,7 @@ app.get('/', (req, res) => {
 });
 
 app.use('/user', require('./src/routes/user.route'));
-// app.use('/post', require('./src/routes/post.route'));
+app.use('/post', require('./src/routes/post.route'));
 
 app.listen(
     PORT,
