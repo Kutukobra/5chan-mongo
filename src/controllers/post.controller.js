@@ -1,4 +1,4 @@
-const postRepository = require('../repositories/post.repository');
+const Post = require('../models/post.model');
 const baseResponse = require('../utils/baseResponse.util');
 
 let lastContent = "";
@@ -40,7 +40,7 @@ exports.createPost = async (req, res) => {
     }
 
     try {
-        const post = await postRepository.createPost({...req.body, ...req.file});
+        const post =  new Post({...req.body, ...req.file});
         baseResponse (
             res,
             true,
@@ -61,12 +61,12 @@ exports.createPost = async (req, res) => {
 
 exports.getPosts = async (req, res) => {
     try {
-        const posts = await postRepository.getPosts();
+        const posts = await Post.find();
         baseResponse(
             res,
             true,
             200,
-            "Get all posts.",
+            "Get all posts and replies.",
             posts
         )
     } catch (error) {
@@ -79,38 +79,18 @@ exports.getPosts = async (req, res) => {
     }
 }
 
-exports.getReplies = async (req, res) => {
-    try {
-        const replies = await postRepository.getReplies(req.params.id);
-        baseResponse(
-            res,
-            true,
-            200,
-            "Get all replies.",
-            replies
-        )
-    } catch (error) {
-        baseResponse (
-            res,
-            true,
-            500,
-            error.message || "Failed to get replies."
-        );
-    }
-}
-
 exports.deletePost = async (req, res) => {
-    if (!req.query.id || !req.query.creator_id) {
+    if (!req.query.id) {
         return baseResponse(
             res,
             false,
             400,
-            "Missing post id or creator id."
+            "Missing post id."
         )
     }
 
     try {
-        const post = await postRepository.deletePost(req.query.id, req.query.creator_id);
+        const post = await Post.findByIdAndDelete(req.query.id);
         baseResponse(
             res,
             true,

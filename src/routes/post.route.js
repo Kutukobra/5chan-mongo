@@ -34,8 +34,6 @@ router.post('/new', limiter, upload.single('file'), postController.createPost);
 
 router.get('/', postController.getPosts);
 
-router.get('/:id', postController.getReplies);
-
-// router.delete('/', postController.getPosts);
+router.delete('/', postController.deletePost);
 
 module.exports = router;
