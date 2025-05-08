@@ -44,7 +44,11 @@ exports.register = async (req, res) => {
             user
         )            
     } catch (err) {
-        res.status(400).json({ success: false, message: err.message });
+        baseResponse(
+            res,
+            false,
+            "Register failed: " + err.message
+        );
         console.log(`Error Message: ${err.message}`);
     }
 }
