@@ -18,12 +18,17 @@ const postSchema = new mongoose.Schema (
         replies: [{
             type: mongoose.Schema.Types.ObjectId,
             ref: "Post"
-        }]
+        }],
     }, { timestamps: true }
 )
 
-const autoPopulateReplies = (next) => {
-    this.populate('replies');
+function autoPopulateReplies(next) {
+    this.populate({
+        path: 'replies',
+        populate: {
+            path: 'replies'
+        }
+    });
     next();
 }
 
