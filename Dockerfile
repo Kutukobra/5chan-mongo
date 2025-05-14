@@ -1,14 +1,9 @@
-FROM node:24
+FROM node:22
 
 WORKDIR /app
-
-COPY package*.json ./
+COPY package.json /app
 
 RUN npm install --legacy-peer-deps
 
-COPY . .
-
-ENV PORT=3000
-EXPOSE 3000
-
-CMD ["npm", "start"]
+COPY . /app
+CMD ["node", "index.js"]

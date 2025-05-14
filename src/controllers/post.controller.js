@@ -41,7 +41,7 @@ exports.createPost = async (req, res) => {
     }
 
     try {
-        const post =  new Post({...req.body, ...req.file});
+        const post = new Post({...req.body, ...req.file});
         baseResponse (
             res,
             true,

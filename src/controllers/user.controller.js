@@ -1,5 +1,6 @@
 const baseResponse = require('../utils/baseResponse.util');
 const User = require('../models/user.model');
+const bcrypt = require('bcrypt');
 
 exports.register = async (req, res) => {
     try {
@@ -16,13 +17,14 @@ exports.register = async (req, res) => {
             user
         )            
     } catch (err) {
-        baseResponse(
-            res,
-            false,
-            "Register failed: " + err.message
-        );
-        console.log(`Error Message: ${err.message}`);
-    }
+    baseResponse(
+        res,
+        false,
+        400, 
+        "Register failed: " + err.message
+    );
+    console.log(`Error Message: ${err.message}`);
+}
 }
 
 exports.login = async (req, res) => {
@@ -43,12 +45,12 @@ exports.login = async (req, res) => {
             user
         );
     } catch (err) {
-        baseResponse(
-            res,
-            false,
-            400,
-            "Login failed: " + err.message
-        );
-        console.log(`Error Message: ${err.message}`);
+    baseResponse(
+        res,
+        false,
+        400,
+        "Login failed: " + err.message
+    );
+    console.log(`Error Message: ${err.message}`);
     }
 }
