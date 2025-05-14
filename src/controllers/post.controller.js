@@ -1,61 +1,39 @@
 const Post = require('../models/post.model');
-
 const baseResponse = require('../utils/baseResponse.util');
 
-let lastContent = "";
-
 exports.createPost = async (req, res) => {
-    console.log(lastContent);
-    if (!req.body.content && !req.file) {
-        return baseResponse(
-            res,
-            false,
-            400,
-            "Empty post error."
-        )
-    }
-
-    if ((req.body.content || req.body.content != "") && req.body.content == lastContent) {
-        return baseResponse (
-            res,
-            true,
-            200,
-            "Post created.",
-            {
-                id: "89617b10-5663-412e-81a7-4226dd97961b",
-                content: lastContent,
-                image_url: null,
-                created_at: "2025-05-05T15:22:18.423Z",
-                creator_id: "00000000-0000-0000-0000-000000000000",
-                parent_id: "00000000-0000-0000-0000-000000000000"
-            }
-        );
-    }
-
-    if (!req.body.parent_id) {
-        req.body.parent_id = "00000000-0000-0000-0000-000000000000";
-    }
-
-    if (!req.body.creator_id) {
-        req.body.creator_id = "00000000-0000-0000-0000-000000000000";
-    }
-
     try {
-        const post = new Post({...req.body, ...req.file});
-        baseResponse (
+        const postData = {
+            text: req.body.text || "",
+            image_url: req.file ? req.file.path : null,
+            owner: req.body.owner || null
+        };
+
+        const post = new Post(postData);
+        await post.save();
+
+        // If this is a reply, update the parent post's replies array
+        if (req.body.parent_id) {
+            const parentPost = await Post.findById(req.body.parent_id);
+            if (parentPost) {
+                parentPost.replies.push(post._id);
+                await parentPost.save();
+            }
+        }
+
+        baseResponse(
             res,
             true,
             200,
-            "Post created.",
+            "Post created successfully",
             post
         );
-        lastContent = post.content;
     } catch (error) {
-        baseResponse (
+        baseResponse(
             res,
-            true,
+            false,
             500,
-            error.message || "Failed to create post."
+            error.message || "Failed to create post"
         );
     }
 };
