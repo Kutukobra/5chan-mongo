@@ -1,4 +1,5 @@
 const Post = require('../models/post.model');
+
 const baseResponse = require('../utils/baseResponse.util');
 
 let lastContent = "";
