@@ -19,6 +19,11 @@ const postSchema = new mongoose.Schema (
             type: mongoose.Schema.Types.ObjectId,
             ref: "Post"
         }],
+        topic: {
+            type: String,
+            enum: ['technology', 'humor', 'science', 'art', 'music', 'movie', 'place'],
+            required: false
+        }
     }, { timestamps: true }
 )
 

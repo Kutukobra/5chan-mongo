@@ -1,4 +1,5 @@
 const postController = require('../controllers/post.controller');
+const { canDeletePost, canEditPost } = require('../middleware/post.middleware');
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
@@ -6,7 +7,7 @@ const multer = require('multer');
 const cloudinary = require('cloudinary').v2;
 const {CloudinaryStorage} = require('multer-storage-cloudinary');
 const rateLimit = require('express-rate-limit');
-
+const { authenticate, authorize } = require('../middleware/auth.middleware');
 
 cloudinary.config({
     cloudinary_url: process.env.CLOUDINARY_URL
@@ -35,6 +36,10 @@ router.post('/new', upload.single('file'), postController.createPost);
 
 router.get('/', postController.getPosts);
 
-router.delete('/', postController.deletePost);
+router.get('/:topic', postController.getPostByTopic);
+
+router.put('/', authenticate, authorize('user'), canEditPost, postController.editPost);
+
+router.delete('/', authenticate, authorize('admin', 'user'), canDeletePost, postController.deletePost);
 
 module.exports = router;
