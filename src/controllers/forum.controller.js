@@ -1,32 +1,23 @@
-const Post = require('../models/post.model');
+const Post = require('../models/forum.model');
 const baseResponse = require('../utils/baseResponse.util');
 
-exports.createPost = async (req, res) => {
+exports.createForum = async (req, res) => {
     try {
-        const postData = {
-            text: req.body.text || "",
-            image_url: req.file ? req.file.path : null,
-            owner: req.body.owner || null,
-            topic: req.body.topic || null
+        const forumData = {
+            title: req.body.title || "",
+            owner: req.body.owner,
+            admins: [],
+            posts: [],
         };
 
-        const post = new Post(postData);
-        await post.save();
-
-        // If this is a reply, update the parent post's replies array
-        if (req.body.parent_id) {
-            const parentPost = await Post.findById(req.body.parent_id);
-            if (parentPost) {
-                parentPost.replies.push(post._id);
-                await parentPost.save();
-            }
-        }
+        const forum = new Forum(forumData);
+        await forum.save();
 
         baseResponse(
             res,
             true,
             200,
-            "Post created successfully",
+            "Forum created successfully",
             post
         );
     } catch (error) {
@@ -34,16 +25,14 @@ exports.createPost = async (req, res) => {
             res,
             false,
             500,
-            error.message || "Failed to create post"
+            error.message || "Failed to create forum"
         );
     }
 };
 
-exports.getPostsOfUser = async (req, res) => {
+exports.getForums = async (req, res) => {
     try {
-        const userId = req.params.userId;
-        const user = await User.findById(userId);
-        const posts = await Post.find({ forum:  { $in: user.forums } });
+        const forums = await Forum.find();
         baseResponse(
             res,
             true,

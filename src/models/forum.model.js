@@ -4,14 +4,22 @@ const forumSchema = new mongoose.Schema (
     {
         title: {
             type: String,
+            required: true,
+        },
+        password: {
+            type: String,
             required: false,
         },
         owner: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "User",
-            required: false,
+            required: true,
         },
         admins: [{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User"
+        }],
+        users: [{
             type: mongoose.Schema.Types.ObjectId,
             ref: "User"
         }],
@@ -31,9 +39,8 @@ function autoPopulatePosts(next) {
     next();
 }
 
-postSchema
-    .pre('findOne', autoPopulateReplies)
-    .pre('find', autoPopulateReplies);
+forumSchema
+    .pre('findOne', autoPopulatePosts);
 
-const Post = mongoose.model("Post", postSchema);
-module.exports = Post;
+const Forum = mongoose.model("Forum", forumSchema);
+module.exports = Forum;

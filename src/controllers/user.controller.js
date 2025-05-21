@@ -68,6 +68,28 @@ exports.login = async (req, res) => {
     }
 }
 
+exports.getUserForums = async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id)
+                                .populate("forums");
+        baseResponse(
+            res,
+            true,
+            200,
+            "Get user forums success.",
+            user.forums
+        )
+    } catch (error) {
+        baseResponse(
+            res,
+            false,
+            400,
+            "Login failed: " + err.message
+        );
+        console.log(`Error Message: ${err.message}`);
+    }
+}
+
 exports.deleteUser = async (req, res) => {
     try {
         const user = await User.findOneAndDelete({ username: req.params.username });

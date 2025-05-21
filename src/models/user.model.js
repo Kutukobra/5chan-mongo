@@ -12,6 +12,10 @@ const userSchema = new mongoose.Schema (
             type: String,
             required: true,
         },
+        forums: [{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Forums",
+        }],
         posts: [{
             type: mongoose.Schema.Types.ObjectId,
             ref: "Post",
