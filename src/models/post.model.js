@@ -15,7 +15,7 @@ const postSchema = new mongoose.Schema (
             ref: "User",
             required: false,
         },
-        parent_post: {
+        parent_id: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "Post",
             required: false,

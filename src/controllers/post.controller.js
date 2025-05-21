@@ -1,4 +1,5 @@
 const Post = require('../models/post.model');
+const User = require('../models/user.model')
 const baseResponse = require('../utils/baseResponse.util');
 
 exports.createPost = async (req, res) => {
@@ -7,24 +8,20 @@ exports.createPost = async (req, res) => {
             text: req.body.text || "",
             image_url: req.file ? req.file.path : null,
             owner: req.body.owner || null,
-            replies: [],
-            forum: []
+            parent_id: req.body.parent_id || null,
+            forum: req.body.parent_id || null
         };
+
+        console.log(postData);
 
         const post = new Post(postData);
         await post.save();
 
-        // If this is a reply, update the parent post's replies array
-        if (req.body.parent_id) {
-            await Post.update(
-                { _id: req.body.parent_id },
+        if (post.parent_id) {
+            await Post.findOneAndUpdate(
+                { _id: post.parent_id },
                 { $push: { replies: post._id } }
             );
-            const parentPost = await Post.findById(req.body.parent_id);
-            if (parentPost) {
-                parentPost.replies.push(post._id);
-                await parentPost.save();
-            }
         }
 
         baseResponse(
@@ -44,11 +41,31 @@ exports.createPost = async (req, res) => {
     }
 };
 
-exports.getPostsOfUser = async (req, res) => {
+exports.getPostById = async (req, res) => {
+    try {
+        const post = await Post.findById(req.params.id);
+        baseResponse(
+            res,
+            true,
+            200,
+            "Post found",
+            post
+        );
+    } catch (error) {
+        baseResponse(
+            res,
+            false,
+            500,
+            error.message || "Failed to create post"
+        );
+    }
+};
+
+exports.getPostsForUser = async (req, res) => {
     try {
         const userId = req.params.userId;
         const user = await User.findById(userId);
-        const posts = await Post.find({ forum:  { $in: user.forums } });
+        const posts = await Post.find({$or: [{forum:  { $in: user.forums }}, {forum: null}]});
         baseResponse(
             res,
             true,

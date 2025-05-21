@@ -24,11 +24,11 @@ const storage = new CloudinaryStorage({
 
 const upload = multer({storage});
 
-router.post('/new', upload.single('file'), postController.createPost);
+router.post('/', upload.single('file'), postController.createPost);
 
-router.get('/', postController.getPosts);
+router.get('/:id', postController.getPostById);
 
-router.get('/:topic', postController.getPostByTopic);
+router.get('/forUser/:userId', postController.getPostsForUser);
 
 router.put('/', authenticate, authorize('user'), canEditPost, postController.editPost);
 

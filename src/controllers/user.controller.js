@@ -1,6 +1,6 @@
 const baseResponse = require('../utils/baseResponse.util');
 const User = require('../models/user.model');
-const bcrypt = require('bcrypt');
+const passwordUtil = require('../utils/password.util');
 const { generateToken } = require('../utils/jwt.util');
 
 exports.register = async (req, res) => {
@@ -41,7 +41,7 @@ exports.login = async (req, res) => {
         const user = await User.findOne({ username: username });
         if (!user) throw new Error("User not found");
 
-        const isMatch = await bcrypt.compare(password, user.password);
+        const isMatch = await passwordUtil.comparePassword(password, user.password);
         if (!isMatch) throw new Error("Invalid Password");
 
         const token = generateToken({
