@@ -1,13 +1,18 @@
-FROM node:22
+FROM node:slim
+
+RUN mkdir -p /app
 
 WORKDIR /app
-COPY package.json /app
+COPY package*.json ./
 
-RUN npm install --legacy-peer-deps
+COPY ./src ./src
+# COPY ./public ./public
 
-COPY . /app
+RUN npm install --legacy-peer-deps \
+    && npm run start \
+    && rm -fr node_modules
+
 CMD ["node", "index.js"]
 
 ENV PORT=3000
 EXPOSE 3000
-

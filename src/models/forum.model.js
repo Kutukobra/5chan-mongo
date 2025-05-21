@@ -1,12 +1,8 @@
 const mongoose = require('mongoose');
 
-const postSchema = new mongoose.Schema (
+const forumSchema = new mongoose.Schema (
     {
-        text: {
-            type: String,
-            required: false,
-        },
-        image_url: {
+        title: {
             type: String,
             required: false,
         },
@@ -15,21 +11,19 @@ const postSchema = new mongoose.Schema (
             ref: "User",
             required: false,
         },
-        replies: [{
+        admins: [{
             type: mongoose.Schema.Types.ObjectId,
-            ref: "Post"
+            ref: "User"
         }],
-        forum: {
+        posts: [{
             type: mongoose.Schema.Types.ObjectId,
-            ref: "Forum",
-            required: false
-        }
+        }]
     }, { timestamps: true }
 )
 
-function autoPopulateReplies(next) {
+function autoPopulatePosts(next) {
     this.populate({
-        path: 'replies',
+        path: 'posts',
         populate: {
             path: 'replies'
         }
