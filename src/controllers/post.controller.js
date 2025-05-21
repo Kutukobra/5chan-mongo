@@ -7,7 +7,8 @@ exports.createPost = async (req, res) => {
             text: req.body.text || "",
             image_url: req.file ? req.file.path : null,
             owner: req.body.owner || null,
-            topic: req.body.topic || null
+            replies: [],
+            forum: []
         };
 
         const post = new Post(postData);
@@ -15,6 +16,10 @@ exports.createPost = async (req, res) => {
 
         // If this is a reply, update the parent post's replies array
         if (req.body.parent_id) {
+            await Post.update(
+                { _id: req.body.parent_id },
+                { $push: { replies: post._id } }
+            );
             const parentPost = await Post.findById(req.body.parent_id);
             if (parentPost) {
                 parentPost.replies.push(post._id);
@@ -44,26 +49,6 @@ exports.getPostsOfUser = async (req, res) => {
         const userId = req.params.userId;
         const user = await User.findById(userId);
         const posts = await Post.find({ forum:  { $in: user.forums } });
-        baseResponse(
-            res,
-            true,
-            200,
-            "Get all posts and replies.",
-            posts
-        )
-    } catch (error) {
-        baseResponse (
-            res,
-            true,
-            500,
-            error.message || "Failed to get posts."
-        );
-    }
-}
-
-exports.getPostByTopic = async (req, res) => {
-    try {
-        const posts = await Post.find({ topic: req.params.topic });
         baseResponse(
             res,
             true,

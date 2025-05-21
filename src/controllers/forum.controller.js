@@ -5,6 +5,8 @@ exports.createForum = async (req, res) => {
     try {
         const forumData = {
             title: req.body.title || "",
+            description: req.body.description,
+            password: req.body.password,
             owner: req.body.owner,
             admins: [],
             posts: [],
@@ -18,7 +20,7 @@ exports.createForum = async (req, res) => {
             true,
             200,
             "Forum created successfully",
-            post
+            forum
         );
     } catch (error) {
         baseResponse(
@@ -32,13 +34,13 @@ exports.createForum = async (req, res) => {
 
 exports.getForums = async (req, res) => {
     try {
-        const forums = await Forum.find();
+        const forums = await Forum.find( {password: { $ne: null }} );
         baseResponse(
             res,
             true,
             200,
             "Get all posts and replies.",
-            posts
+            forums
         )
     } catch (error) {
         baseResponse (
@@ -50,77 +52,33 @@ exports.getForums = async (req, res) => {
     }
 }
 
-exports.getPostByTopic = async (req, res) => {
+exports.getForumsByUser = async (req, res) => {
     try {
-        const posts = await Post.find({ topic: req.params.topic });
-        baseResponse(
-            res,
-            true,
-            200,
-            "Get all posts and replies.",
-            posts
-        )
-    } catch (error) {
-        baseResponse (
-            res,
-            true,
-            500,
-            error.message || "Failed to get posts."
-        );
-    }
-}
-
-exports.editPost = async (req, res) => {
-    try {
-        const post = req.post; // Get post from middleware
-        const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000);
-        
-        if (post.createdAt < twoHoursAgo) {
+        const user = await User.findById(req.params.userId)
+                                .populate("forums");
+        if (!user) {
             return baseResponse(
-                res, 
-                false, 
-                403, 
-                "You can only edit posts within 2 hours of creation"
-            );
+                res,
+                false,
+                400,
+                "Invalid user ID."
+            )
         }
-
-        post.text = req.body.text || post.text;
-        await post.save();
-
-        baseResponse(
-            res, 
-            true, 
-            200, 
-            "Post updated successfully",
-            post
-        );
-    } catch (error) {
-        baseResponse(
-            res, 
-            false, 
-            500, 
-            error.message || "Failed to update post"
-        );
-    }
-};
-
-exports.deletePost = async (req, res) => {
-    try {
-        await Post.findByIdAndDelete(req.query.id);
-        
+            
         baseResponse(
             res,
             true,
             200,
-            "Post deleted successfully",
-            req.post
-        );
+            "Get user forums success.",
+            user.forums
+        )
     } catch (error) {
         baseResponse(
             res,
             false,
-            500,
-            error.message || "Failed to delete post"
+            400,
+            "Login failed: " + err.message
         );
+        console.log(`Error Message: ${err.message}`);
     }
 }

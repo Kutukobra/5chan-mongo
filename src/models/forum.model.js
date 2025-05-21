@@ -6,6 +6,10 @@ const forumSchema = new mongoose.Schema (
             type: String,
             required: true,
         },
+        description: {
+            type: String,
+            required: false,
+        },
         password: {
             type: String,
             required: false,
@@ -28,19 +32,6 @@ const forumSchema = new mongoose.Schema (
         }]
     }, { timestamps: true }
 )
-
-function autoPopulatePosts(next) {
-    this.populate({
-        path: 'posts',
-        populate: {
-            path: 'replies'
-        }
-    });
-    next();
-}
-
-forumSchema
-    .pre('findOne', autoPopulatePosts);
 
 const Forum = mongoose.model("Forum", forumSchema);
 module.exports = Forum;

@@ -21,6 +21,7 @@ app.get('/', (req, res) => {
 
 app.use('/user', require('./src/routes/user.route'));
 app.use('/post', require('./src/routes/post.route'));
+app.use('/forum', require('./src/routes/forum.route'));
 
 connectDB().then(() => {
     app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
