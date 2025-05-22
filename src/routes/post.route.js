@@ -21,17 +21,16 @@ const storage = new CloudinaryStorage({
     }
 });
 
-// const limiter = rateLimit({
-//     windowMs: 10 * 60 * 1000,
-//     limit: 5, // 10 / 10 minute
-//     standardHeaders: 'draft-8', // draft-6: `RateLimit-*` headers; draft-7 & draft-8: combined `RateLimit` header
-//     legacyHeaders: false, // Disable the `X-RateLimit-*` headers.
-//     // store: ... , // Redis, Memcached, etc. See below.
-// })
+//const limiter = rateLimit({
+//    windowMs: 10 * 60 * 1000,
+//    limit: 5, // 10 / 10 minute
+//    standardHeaders: 'draft-8', // draft-6: `RateLimit-*` headers; draft-7 & draft-8: combined `RateLimit` header
+//    legacyHeaders: false, // Disable the `X-RateLimit-*` headers.
+//    // store: ... , // Redis, Memcached, etc. See below.
+//})
 
 const upload = multer({storage});
 
-// router.post('/new', limiter, upload.single('file'), postController.createPost);
 router.post('/new', upload.single('file'), postController.createPost);
 
 router.get('/', postController.getPosts);

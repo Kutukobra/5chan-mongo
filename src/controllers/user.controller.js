@@ -90,3 +90,30 @@ exports.deleteUser = async (req, res) => {
         console.log(`Error Message: ${err.message}`);
     }
 }
+
+exports.deleteUser = async (req, res) => {
+    try {
+        const { username } = req.body;
+
+        const user = await User.findOne({ username: username });
+        if (!user) throw new Error("User not found");
+
+        await User.findByIdAndDelete(user._id);
+
+        baseResponse(
+            res,
+            true,
+            200,
+            "User deleted.",
+            user
+        );
+    } catch (err) {
+    baseResponse(
+        res,
+        false,
+        400,
+        "Delete user failed: " + err.message
+    );
+    console.log(`Error Message: ${err.message}`);
+    }
+}
