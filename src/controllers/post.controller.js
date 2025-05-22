@@ -44,7 +44,7 @@ exports.createPost = async (req, res) => {
 
 exports.getPostById = async (req, res) => {
     try {
-        const post = await Post.findById(req.params.id);
+        const post = await Post.findById(req.params.id).populate('owner');
         baseResponse(
             res,
             true,
@@ -66,7 +66,12 @@ exports.getPostsForUser = async (req, res) => {
     try {
         const userId = req.params.userId;
         const user = await User.findById(userId);
-        const posts = await Post.find({$or: [{forum:  { $in: user.forums }}, {forum: null}]});
+        const posts = await Post.find({
+            $or: [{forum:  { $in: user.forums }}, {forum: null, parent_id: null}]
+        }).populate({
+            path: 'owner',
+            select: 'username _id'
+        }).sort({ createdAt: -1 });
         baseResponse(
             res,
             true,
@@ -80,6 +85,38 @@ exports.getPostsForUser = async (req, res) => {
             false,
             500,
             error.message || "Failed to get posts."
+        );
+    }
+}
+
+exports.getPublicPosts = async (req, res) => {
+    try {
+        const posts = await Post.find({ forum: null, parent_id: null })
+            .populate({
+                path: 'owner',
+                select: 'username _id'
+            })
+            .populate({
+                path: 'replies',
+                populate: {
+                    path: 'owner',
+                    select: 'username _id'
+                }
+            }).sort({ createdAt: -1 });
+
+        baseResponse(
+            res,
+            true,
+            200,
+            "Get all public posts.",
+            posts
+        );
+    } catch (error) {
+        baseResponse(
+            res,
+            false,
+            500,
+            error.message || "Failed to get public posts."
         );
     }
 }
@@ -120,7 +157,8 @@ exports.editPost = async (req, res) => {
 
 exports.deletePost = async (req, res) => {
     try {
-        const { id, userId } = req.query;
+        const id = req.query.id; // Get id directly from query
+        const userId = req.user.id;
 
         const post = await Post.findById(id);
         if (!post) {
@@ -135,6 +173,8 @@ exports.deletePost = async (req, res) => {
             const forum = await Forum.findById(post.forum);
             const isAdmin = forum?.admins.some(adminId => adminId.toString() === userId);
             const isOwner = post.owner.toString() === userId;
+
+            console.log(post.owner.toString(), userId, isOwner);
 
             if (!isOwner && !isAdmin) {
                 return baseResponse(res, false, 403, "Invalid privilege");
