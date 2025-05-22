@@ -28,7 +28,7 @@ router.post('/', upload.single('file'), postController.createPost);
 
 router.get('/:id', postController.getPostById);
 
-router.get('/forUser/:userId', postController.getPostsForUser);
+router.get('/user/:userId', postController.getPostsForUser);
 
 router.put('/', authenticate, authorize('user'), canEditPost, postController.editPost);
 

@@ -6,6 +6,6 @@ router.post('/', forumController.createForum);
 
 router.get('/', forumController.getForums);
 
-router.get('/:userId', forumController.getForumsByUser);
+router.get('/user/:userId', forumController.getForumsForUser);
 
 module.exports = router;

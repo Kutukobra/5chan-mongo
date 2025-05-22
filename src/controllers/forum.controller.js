@@ -1,19 +1,23 @@
-const Post = require('../models/forum.model');
+const Forum = require('../models/forum.model');
+const User = require('../models/user.model')
 const baseResponse = require('../utils/baseResponse.util');
 
 exports.createForum = async (req, res) => {
     try {
         const forumData = {
             title: req.body.title || "",
-            description: req.body.description,
-            password: req.body.password,
+            description: req.body.description || null,
+            password: req.body.password || null,
             owner: req.body.owner,
-            admins: [],
-            posts: [],
+            admins: req.body.owner,
+            users: req.body.owner
         };
 
         const forum = new Forum(forumData);
         await forum.save();
+
+        const user = await User.findByIdAndUpdate(req.body.owner, { $push: { forums: forum._id } })
+        console.log(user);
 
         baseResponse(
             res,
@@ -34,12 +38,12 @@ exports.createForum = async (req, res) => {
 
 exports.getForums = async (req, res) => {
     try {
-        const forums = await Forum.find( {password: { $ne: null }} );
+        const forums = await Forum.find();
         baseResponse(
             res,
             true,
             200,
-            "Get all posts and replies.",
+            "Get all forums.",
             forums
         )
     } catch (error) {
@@ -52,10 +56,11 @@ exports.getForums = async (req, res) => {
     }
 }
 
-exports.getForumsByUser = async (req, res) => {
+exports.getForumsForUser = async (req, res) => {
     try {
         const user = await User.findById(req.params.userId)
                                 .populate("forums");
+        console.log(user);
         if (!user) {
             return baseResponse(
                 res,
@@ -76,9 +81,9 @@ exports.getForumsByUser = async (req, res) => {
         baseResponse(
             res,
             false,
-            400,
-            "Login failed: " + err.message
+            500,
+            "Get forums failed: " + error.message
         );
-        console.log(`Error Message: ${err.message}`);
+        console.log(`Error Message: ${error.message}`);
     }
 }

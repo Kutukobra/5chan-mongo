@@ -76,7 +76,7 @@ exports.getPostsForUser = async (req, res) => {
     } catch (error) {
         baseResponse (
             res,
-            true,
+            false,
             500,
             error.message || "Failed to get posts."
         );

@@ -14,7 +14,7 @@ const userSchema = new mongoose.Schema (
         },
         forums: [{
             type: mongoose.Schema.Types.ObjectId,
-            ref: "Forums",
+            ref: "Forum",
         }],
         posts: [{
             type: mongoose.Schema.Types.ObjectId,
