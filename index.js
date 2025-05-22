@@ -23,7 +23,7 @@ app.use('/user', require('./src/routes/user.route'));
 app.use('/post', require('./src/routes/post.route'));
 
 connectDB().then(() => {
-    app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
+    app.listen(PORT, '0.0.0.0', () => console.log(`Server running on http://0.0.0.0:${PORT}`));
 }).catch((err) => {
     console.error("Failed to connect to database:", err);
 });
