@@ -28,10 +28,12 @@ router.post('/', upload.single('file'), postController.createPost);
 
 router.get('/:id', postController.getPostById);
 
+router.get('/', postController.getPublicPosts);
+
 router.get('/user/:userId', postController.getPostsForUser);
 
 router.put('/', authenticate, authorize('user'), canEditPost, postController.editPost);
 
-router.delete('/', authenticate, authorize('admin', 'user'), canDeletePost, postController.deletePost);
+router.delete('/', authenticate, authorize('admin', 'user'), postController.deletePost);
 
 module.exports = router;
