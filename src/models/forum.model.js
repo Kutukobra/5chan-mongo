@@ -1,34 +1,40 @@
 const mongoose = require('mongoose');
-const bcrypt = require('bcrypt');
 
-const userSchema = new mongoose.Schema (
+const forumSchema = new mongoose.Schema (
     {
-        username: {
+        title: {
             type: String,
             required: true,
             unique: true,
         },
+        description: {
+            type: String,
+            required: false,
+        },
         password: {
             type: String,
+            required: false,
+        },
+        owner: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
             required: true,
         },
-        forums: [{
+        admins: [{
             type: mongoose.Schema.Types.ObjectId,
-            ref: "Forum",
+            ref: "User"
+        }],
+        users: [{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User"
         }],
         posts: [{
             type: mongoose.Schema.Types.ObjectId,
-            ref: "Post",
-        }],
-        roles: {
-            type: String,
-            enum: ['user', 'admin'],
-            default: 'user',
-        },
+        }]
     }, { timestamps: true }
 )
 
-userSchema.pre('save', async function (next) {
+forumSchema.pre('save', async function (next) {
     if (!this.isModified('password')) return next(); // Only hash the password if it was modified
 
     try {
@@ -40,6 +46,5 @@ userSchema.pre('save', async function (next) {
     }
 })
 
-const User = mongoose.model("User", userSchema);
-
-module.exports = User;
+const Forum = mongoose.model("Forum", forumSchema);
+module.exports = Forum;

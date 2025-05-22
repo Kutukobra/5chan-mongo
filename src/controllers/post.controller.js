@@ -1,4 +1,6 @@
 const Post = require('../models/post.model');
+const User = require('../models/user.model');
+const Forum = require('../models/forum.model');
 const baseResponse = require('../utils/baseResponse.util');
 
 exports.createPost = async (req, res) => {
@@ -7,19 +9,20 @@ exports.createPost = async (req, res) => {
             text: req.body.text || "",
             image_url: req.file ? req.file.path : null,
             owner: req.body.owner || null,
-            topic: req.body.topic || null
+            parent_id: req.body.parent_id || null,
+            forum: req.body.parent_id || null
         };
+
+        console.log(postData);
 
         const post = new Post(postData);
         await post.save();
 
-        // If this is a reply, update the parent post's replies array
-        if (req.body.parent_id) {
-            const parentPost = await Post.findById(req.body.parent_id);
-            if (parentPost) {
-                parentPost.replies.push(post._id);
-                await parentPost.save();
-            }
+        if (post.parent_id) {
+            await Post.findOneAndUpdate(
+                { _id: post.parent_id },
+                { $push: { replies: post._id } }
+            );
         }
 
         baseResponse(
@@ -39,29 +42,31 @@ exports.createPost = async (req, res) => {
     }
 };
 
-exports.getPosts = async (req, res) => {
+exports.getPostById = async (req, res) => {
     try {
-        const posts = await Post.find();
+        const post = await Post.findById(req.params.id);
         baseResponse(
             res,
             true,
             200,
-            "Get all posts and replies.",
-            posts
-        )
+            "Post found",
+            post
+        );
     } catch (error) {
-        baseResponse (
+        baseResponse(
             res,
-            true,
+            false,
             500,
-            error.message || "Failed to get posts."
+            error.message || "Failed to create post"
         );
     }
-}
+};
 
-exports.getPostByTopic = async (req, res) => {
+exports.getPostsForUser = async (req, res) => {
     try {
-        const posts = await Post.find({ topic: req.params.topic });
+        const userId = req.params.userId;
+        const user = await User.findById(userId);
+        const posts = await Post.find({$or: [{forum:  { $in: user.forums }}, {forum: null}]});
         baseResponse(
             res,
             true,
@@ -72,7 +77,7 @@ exports.getPostByTopic = async (req, res) => {
     } catch (error) {
         baseResponse (
             res,
-            true,
+            false,
             500,
             error.message || "Failed to get posts."
         );
@@ -115,21 +120,31 @@ exports.editPost = async (req, res) => {
 
 exports.deletePost = async (req, res) => {
     try {
-        await Post.findByIdAndDelete(req.query.id);
-        
-        baseResponse(
-            res,
-            true,
-            200,
-            "Post deleted successfully",
-            req.post
-        );
+        const { id, userId } = req.query;
+
+        const post = await Post.findById(id);
+        if (!post) {
+            return baseResponse(res, false, 404, "Post not found.");
+        }
+
+        if (!post.forum) {
+            if (post.owner.toString() !== userId) {
+                return baseResponse(res, false, 403, "Invalid privilege (not owner)");
+            }
+        } else {
+            const forum = await Forum.findById(post.forum);
+            const isAdmin = forum?.admins.some(adminId => adminId.toString() === userId);
+            const isOwner = post.owner.toString() === userId;
+
+            if (!isOwner && !isAdmin) {
+                return baseResponse(res, false, 403, "Invalid privilege");
+            }
+        }
+
+        await Post.findByIdAndDelete(id);
+
+        baseResponse(res, true, 200, "Post deleted successfully", post);
     } catch (error) {
-        baseResponse(
-            res,
-            false,
-            500,
-            error.message || "Failed to delete post"
-        );
+        baseResponse(res, false, 500, error.message || "Failed to delete post");
     }
-}
+};

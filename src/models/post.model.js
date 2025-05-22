@@ -15,13 +15,18 @@ const postSchema = new mongoose.Schema (
             ref: "User",
             required: false,
         },
+        parent_id: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Post",
+            required: false,
+        },
         replies: [{
             type: mongoose.Schema.Types.ObjectId,
             ref: "Post"
         }],
-        topic: {
-            type: String,
-            enum: ['technology', 'humor', 'science', 'art', 'music', 'movie', 'place'],
+        forum: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Forum",
             required: false
         }
     }, { timestamps: true }

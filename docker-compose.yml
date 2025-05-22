@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  backend:
+    image: bryanfarras/5chan-backend:latest
+    container_name: 5chan-backend
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    restart: always
+
+  frontend:
+    image: bryanfarras/5chan-front:5chan-product1
+    container_name: 5chan-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: always

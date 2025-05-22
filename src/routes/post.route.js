@@ -16,26 +16,19 @@ cloudinary.config({
 const storage = new CloudinaryStorage({
     cloudinary: cloudinary,
     params: {
-        folder: 'sbd',
+        folder: '5chan',
         allowed_formats: ['jpg', 'png', 'jpeg', 'gif', 'svg', 'webp']
     }
 });
 
-//const limiter = rateLimit({
-//    windowMs: 10 * 60 * 1000,
-//    limit: 5, // 10 / 10 minute
-//    standardHeaders: 'draft-8', // draft-6: `RateLimit-*` headers; draft-7 & draft-8: combined `RateLimit` header
-//    legacyHeaders: false, // Disable the `X-RateLimit-*` headers.
-//    // store: ... , // Redis, Memcached, etc. See below.
-//})
 
 const upload = multer({storage});
 
-router.post('/new', upload.single('file'), postController.createPost);
+router.post('/', upload.single('file'), postController.createPost);
 
-router.get('/', postController.getPosts);
+router.get('/:id', postController.getPostById);
 
-router.get('/:topic', postController.getPostByTopic);
+router.get('/user/:userId', postController.getPostsForUser);
 
 router.put('/', authenticate, authorize('user'), canEditPost, postController.editPost);
 
