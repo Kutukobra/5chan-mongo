@@ -1,5 +1,6 @@
 const Post = require('../models/post.model');
-const User = require('../models/user.model')
+const User = require('../models/user.model');
+const Forum = require('../models/forum.model');
 const baseResponse = require('../utils/baseResponse.util');
 
 exports.createPost = async (req, res) => {
@@ -119,21 +120,31 @@ exports.editPost = async (req, res) => {
 
 exports.deletePost = async (req, res) => {
     try {
-        await Post.findByIdAndDelete(req.query.id);
-        
-        baseResponse(
-            res,
-            true,
-            200,
-            "Post deleted successfully",
-            req.post
-        );
+        const { id, userId } = req.query;
+
+        const post = await Post.findById(id);
+        if (!post) {
+            return baseResponse(res, false, 404, "Post not found.");
+        }
+
+        if (!post.forum) {
+            if (post.owner.toString() !== userId) {
+                return baseResponse(res, false, 403, "Invalid privilege (not owner)");
+            }
+        } else {
+            const forum = await Forum.findById(post.forum);
+            const isAdmin = forum?.admins.some(adminId => adminId.toString() === userId);
+            const isOwner = post.owner.toString() === userId;
+
+            if (!isOwner && !isAdmin) {
+                return baseResponse(res, false, 403, "Invalid privilege");
+            }
+        }
+
+        await Post.findByIdAndDelete(id);
+
+        baseResponse(res, true, 200, "Post deleted successfully", post);
     } catch (error) {
-        baseResponse(
-            res,
-            false,
-            500,
-            error.message || "Failed to delete post"
-        );
+        baseResponse(res, false, 500, error.message || "Failed to delete post");
     }
-}
+};
