@@ -1,5 +1,6 @@
 const baseResponse = require('../utils/baseResponse.util');
 const User = require('../models/user.model');
+const Forum = require('../models/forum.model');
 const passwordUtil = require('../utils/password.util');
 const { generateToken } = require('../utils/jwt.util');
 
@@ -86,6 +87,63 @@ exports.deleteUser = async (req, res) => {
             false,
             400,
             "Delete failed: " + err.message
+        );
+        console.log(`Error Message: ${err.message}`);
+    }
+}
+
+exports.joinForum = async (req, res) => {
+    try {
+        const { userId, forumId, password } = req.body;
+        const user = await User.findById(userId);
+        if  (!user) {
+            return baseResponse(
+                req,
+                false,
+                400,
+                "User not found."
+            )
+        }
+
+        const forum = await Forum.findById(forumId);
+        if (!forum) {
+            return baseResponse(
+                req,
+                false,
+                400,
+                "Forum not found."
+            )
+        }
+
+        
+        const isMatch = await passwordUtil.comparePassword(password, forum.password);
+        if (!isMatch) 
+            return baseResponse(
+                req,
+                false,
+                400,
+                "Wrong forum password."
+            )
+
+        user.forums.push(forumId);
+        user.save();
+
+        forum.users.push(userId);
+        forum.save();
+
+        baseResponse(
+            req,
+            true,
+            200,
+            "Forum joined.",
+            forum
+        )
+    } catch (error) {
+        baseResponse(
+            res,
+            false,
+            400,
+            "Forum join failed: " + err.message
         );
         console.log(`Error Message: ${err.message}`);
     }
